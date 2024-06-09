@@ -45,8 +45,13 @@ def main():
 
     # Predict on list of characters
     if verbose:
-        print("Predicting fonts for each character...")
-    aggregate_predictions(char_images)
+        print("Predicting fonts...")
+    predictions = aggregate_predictions(char_images)
+
+    # Print the top results
+    print("Font predictions:")
+    for font, score in sorted_fonts:
+        print(f"{font}: {score:.4f}")
 
 
 if __name__ == "__main__":
