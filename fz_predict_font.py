@@ -6,13 +6,13 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 
 
-def load_class_indices(path='class_indices.json'):
+def load_class_indices(path="class_indices.json"):
     import json
     with open(path, 'r') as json_file:
         class_indices = json.load(json_file)
     return class_indices
 
-def predict_font(image_path, model_path='font_recognition_model.keras', indices_path='class_indices.json'):
+def predict_font(image_path, model_path="font_recognition_model.keras", indices_path="class_indices.json"):
     model = load_model(model_path)
     class_indices = load_class_indices(indices_path)
 
@@ -28,3 +28,17 @@ def predict_font(image_path, model_path='font_recognition_model.keras', indices_
 
     # Return the top 5 predictions
     return labeled_predictions[:5]
+
+def aggregate_predictions(image_paths, model_path="font_recognition_model.keras", indices_path="class_indices.json"):
+    font_scores = defaultdict(float)
+
+    for image_path in image_paths:
+        predictions = predict_font(image_path, model_path, indices_path)
+        for font, prob in predictions:
+            # Weighted voting
+            font_scores[font] += prob
+
+    # Sort fonts by their aggregated scores
+    sorted_fonts = sorted(font_scores.items(), key=lambda x: x[1], reverse=True)
+
+    return sorted_fonts
