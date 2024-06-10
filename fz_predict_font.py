@@ -1,44 +1,132 @@
 import json
 import sys
+import cv2
 import numpy as np
 from collections import defaultdict
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 
 
-def load_class_indices(path="class_indices.json"):
-    import json
-    with open(path, 'r') as json_file:
-        class_indices = json.load(json_file)
-    return class_indices
+model_path = "font_recognition_model.keras"
+indices_path = "class_indices.json"
+model = load_model(model_path)
+with open(indices_path, 'r') as json_file:
+    class_indices = json.load(json_file)
+class_labels = {v: k for k, v in class_indices.items()}
 
-def predict_font(image_path, model_path="font_recognition_model.keras", indices_path="class_indices.json"):
-    model = load_model(model_path)
-    class_indices = load_class_indices(indices_path)
+#def predict_font(image):
+#    if not isinstance(image, np.ndarray):
+#        raise ValueError("The image must be a numpy array.")
+#
+#    image = img_to_array(image)
+#    image = np.expand_dims(image, axis=0)
+#    image /= 255.0
+#
+#    # Predict and label the predictions
+#    prediction = model.predict(image)[0]
+#    labeled_predictions = [(class_labels[i], float(prob)) for i, prob in enumerate(prediction)]
+#    labeled_predictions.sort(key=lambda x: x[1], reverse=True)
+#
+#    return labeled_predictions
 
-    img = load_img(image_path, target_size=(64, 64))
-    img_array = img_to_array(img)
-    img_array = np.expand_dims(img_array, axis=0)
-    img_array /= 255.0
+def predict_font(image, model_path="font_recognition_model.keras", indices_path="class_indices.json"):
+    # Load and preprocess the image
+    if isinstance(image, str):
+        image = load_img(image, target_size=(64, 64), color_mode='rgb')  # Ensure images are loaded in RGB mode
+    elif isinstance(image, np.ndarray):
+        # If the image is grayscale, convert it to RGB by repeating the grayscale channel
+        if len(image.shape) == 2 or (len(image.shape) == 3 and image.shape[2] == 1):
+            image = np.repeat(image[:, :, np.newaxis], 3, axis=2)
+        image = cv2.resize(image, (64, 64))  # Resize the image to match the model's expected input
+        image = image.astype('float32') / 255.0  # Normalize the image
+        image = np.expand_dims(image, axis=0)  # Add batch dimension
 
-    prediction = model.predict(img_array)[0]
+    # Load model and class indices
+    #model = load_model(model_path)
+    #class_indices = load_class_indices(indices_path)
+
+    # Predict and label the predictions
+    prediction = model.predict(image)[0]
     class_labels = {v: k for k, v in class_indices.items()}
     labeled_predictions = [(class_labels[i], float(prob)) for i, prob in enumerate(prediction)]
     labeled_predictions.sort(key=lambda x: x[1], reverse=True)
 
-    # Return the top 5 predictions
-    return labeled_predictions[:5]
+    return labeled_predictions
 
-def aggregate_predictions(image_paths, model_path="font_recognition_model.keras", indices_path="class_indices.json"):
+def predict_font_from_file(image_path, model_path="font_recognition_model.keras", indices_path="class_indices.json"):
+    # Load and preprocess the image
+    image = load_img(image_path, target_size=(64, 64), color_mode='rgb')
+    image = img_to_array(image)
+    image = np.expand_dims(image, axis=0)
+    image /= 255.0
+
+    # Load model and class indices
+    #model = load_model(model_path)
+    #class_indices = load_class_indices(indices_path)
+
+    # Predict and label the predictions
+    prediction = model.predict(image)[0]
+    class_labels = {v: k for k, v in class_indices.items()}
+    labeled_predictions = [(class_labels[i], float(prob)) for i, prob in enumerate(prediction)]
+    labeled_predictions.sort(key=lambda x: x[1], reverse=True)
+
+    return labeled_predictions
+
+def aggregate_predictions(predictions):
     font_scores = defaultdict(float)
+    for prediction in predictions:
+        for font, score in prediction:
+            font_scores[font] += score
 
-    for image_path in image_paths:
-        predictions = predict_font(image_path, model_path, indices_path)
-        for font, prob in predictions:
-            # Weighted voting
-            font_scores[font] += prob
-
-    # Sort fonts by their aggregated scores
+    # Sort and return the top results
     sorted_fonts = sorted(font_scores.items(), key=lambda x: x[1], reverse=True)
-
     return sorted_fonts
+
+#def aggregate_predictions(images):
+#    predictions = []
+#    for image in images:
+#        result = predict_font(image)
+#        predictions.extend(result)
+#
+#    # Aggregate scores
+#    font_scores = defaultdict(float)
+#    for font, score in predictions:
+#        font_scores[font] += score
+#
+#    # Sort and return the top results
+#    sorted_fonts = sorted(font_scores.items(), key=lambda x: x[1], reverse=True)
+#    return sorted_fonts
+
+def aggregate_file_predictions(image_paths):
+    predictions = []
+    for image_path in image_paths:
+        result = predict_font_from_file(image_path)
+        predictions.extend(result)
+
+    # Aggregate scores
+    font_scores = {}
+    for font, score in predictions:
+        if font in font_scores:
+            font_scores[font] += score
+        else:
+            font_scores[font] = score
+
+    # Sort and return the top results
+    sorted_fonts = sorted(font_scores.items(), key=lambda x: x[1], reverse=True)
+    return sorted_fonts
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python fz_predict_font.py <path_to_image1> <path_to_image2> ...")
+        sys.exit(1)
+
+    image_paths = sys.argv[1:]
+    agg_predictions = aggregate_file_predictions(image_paths)
+
+    print("Font predictions:")
+    for font, score in agg_predictions[:5]:
+        print(f"{font}: {score:.4f}")
+
+if __name__ == '__main__':
+    main()
