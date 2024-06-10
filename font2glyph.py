@@ -4,7 +4,6 @@ from fontTools.ttLib import TTFont
 import re
 import sys
 
-
 # Get the name of a font from the TTF metadata
 def get_sanitized_font_name(font_path):
     font = TTFont(font_path)
@@ -31,7 +30,7 @@ def render_glyph_from_font(font_path, char, output_dir, font_size=300):
     image = Image.new('RGBA', (400, 400), (255, 255, 255, 0))
     draw = ImageDraw.Draw(image)
     # Draw the character in black
-    draw.text((50, 20), char, font=font, fill=(0, 0, 0, 255))
+    draw.text((50, 50), char, font=font, fill=(0, 0, 0, 255))
 
     # Crop the image to the char
     bbox = image.getbbox()
@@ -39,8 +38,11 @@ def render_glyph_from_font(font_path, char, output_dir, font_size=300):
     if bbox:
         image = image.crop(bbox)
 
-    # Convert to grayscale
+    # Make grayscale
     image = image.convert('L')
+
+    # Make square
+    image = image.resize((200, 200), Image.LANCZOS)
 
     # Ensure the output directory exists
     char_dir = os.path.join(output_dir, font_name)
