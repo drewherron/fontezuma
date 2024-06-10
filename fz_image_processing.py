@@ -11,7 +11,7 @@ def load_image(image_path):
         raise FileNotFoundError(f"No image found at {image_path}, or the path is incorrect.")
     return image
 
-def save_image(image, export_dir, filename):
+def save_image(image, export_dir, filename, verbose=False):
     if not filename.endswith('.png') and not filename.endswith('.jpg'):
         filename += '.png'
 
@@ -19,7 +19,8 @@ def save_image(image, export_dir, filename):
         os.makedirs(export_dir)
     export_path = os.path.join(export_dir, filename)
     cv2.imwrite(export_path, image)
-    print(f"Image saved to {export_path}")
+    if verbose:
+        print(f"Image saved to {export_path}")
 
 def preprocess(image):
     # Convert to grayscale
@@ -37,7 +38,7 @@ def preprocess(image):
     #image = cv2.erode(image, kernel, iterations=1)
     return image
 
-def detect_and_normalize(image_path, export, export_dir='export', resize_dims=(200, 200)):
+def detect_and_normalize(image_path, export, verbose, export_dir='export', resize_dims=(200, 200)):
     # Load the image
     img = load_image(image_path)
     # Process image
@@ -49,7 +50,7 @@ def detect_and_normalize(image_path, export, export_dir='export', resize_dims=(2
         x, y, w, h = cv2.boundingRect(contour)
         cv2.rectangle(bounding_box_img, (x, y), (x+w, y+h), (0, 255, 0), 2)
     if export:
-        save_image(bounding_box_img, export_dir, 'bounding_boxes.png')
+        save_image(bounding_box_img, export_dir, 'bounding_boxes.png', verbose)
 
     char_images = []
     for idx, contour in enumerate(contours):
