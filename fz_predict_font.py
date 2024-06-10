@@ -14,39 +14,19 @@ with open(indices_path, 'r') as json_file:
     class_indices = json.load(json_file)
 class_labels = {v: k for k, v in class_indices.items()}
 
-#def predict_font(image):
-#    if not isinstance(image, np.ndarray):
-#        raise ValueError("The image must be a numpy array.")
-#
-#    image = img_to_array(image)
-#    image = np.expand_dims(image, axis=0)
-#    image /= 255.0
-#
-#    # Predict and label the predictions
-#    prediction = model.predict(image)[0]
-#    labeled_predictions = [(class_labels[i], float(prob)) for i, prob in enumerate(prediction)]
-#    labeled_predictions.sort(key=lambda x: x[1], reverse=True)
-#
-#    return labeled_predictions
-
 def predict_font(image, model_path="font_recognition_model.keras", indices_path="class_indices.json"):
-    # Load and preprocess the image
     if isinstance(image, str):
-        image = load_img(image, target_size=(64, 64), color_mode='rgb')  # Ensure images are loaded in RGB mode
+        image = load_img(image, target_size=(64, 64), color_mode='rgb')
     elif isinstance(image, np.ndarray):
-        # If the image is grayscale, convert it to RGB by repeating the grayscale channel
         if len(image.shape) == 2 or (len(image.shape) == 3 and image.shape[2] == 1):
             image = np.repeat(image[:, :, np.newaxis], 3, axis=2)
-        image = cv2.resize(image, (64, 64))  # Resize the image to match the model's expected input
-        image = image.astype('float32') / 255.0  # Normalize the image
-        image = np.expand_dims(image, axis=0)  # Add batch dimension
+        image = cv2.resize(image, (64, 64))
+        image = image.astype('float32') / 255.0
+        image = np.expand_dims(image, axis=0)
 
-    # Load model and class indices
-    #model = load_model(model_path)
-    #class_indices = load_class_indices(indices_path)
 
     # Predict and label the predictions
-    prediction = model.predict(image)[0]
+    prediction = model.predict(image, verbose=False)[0]
     class_labels = {v: k for k, v in class_indices.items()}
     labeled_predictions = [(class_labels[i], float(prob)) for i, prob in enumerate(prediction)]
     labeled_predictions.sort(key=lambda x: x[1], reverse=True)
