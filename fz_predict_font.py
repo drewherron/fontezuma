@@ -24,7 +24,6 @@ def predict_font(image, model_path="font_recognition_model.keras", indices_path=
         image = image.astype('float32') / 255.0
         image = np.expand_dims(image, axis=0)
 
-
     # Predict and label the predictions
     prediction = model.predict(image, verbose=False)[0]
     class_labels = {v: k for k, v in class_indices.items()}
@@ -39,10 +38,6 @@ def predict_font_from_file(image_path, model_path="font_recognition_model.keras"
     image = img_to_array(image)
     image = np.expand_dims(image, axis=0)
     image /= 255.0
-
-    # Load model and class indices
-    #model = load_model(model_path)
-    #class_indices = load_class_indices(indices_path)
 
     # Predict and label the predictions
     prediction = model.predict(image)[0]
@@ -61,21 +56,6 @@ def aggregate_predictions(predictions):
     # Sort and return the top results
     sorted_fonts = sorted(font_scores.items(), key=lambda x: x[1], reverse=True)
     return sorted_fonts
-
-#def aggregate_predictions(images):
-#    predictions = []
-#    for image in images:
-#        result = predict_font(image)
-#        predictions.extend(result)
-#
-#    # Aggregate scores
-#    font_scores = defaultdict(float)
-#    for font, score in predictions:
-#        font_scores[font] += score
-#
-#    # Sort and return the top results
-#    sorted_fonts = sorted(font_scores.items(), key=lambda x: x[1], reverse=True)
-#    return sorted_fonts
 
 def aggregate_file_predictions(image_paths):
     predictions = []
