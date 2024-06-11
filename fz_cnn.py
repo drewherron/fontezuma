@@ -6,11 +6,9 @@ from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
 import os
 
 def count_classes(directory):
-    """ Count the number of classes based on folders in the directory. """
     return len([name for name in os.listdir(directory) if os.path.isdir(os.path.join(directory, name))])
 
 def create_generators(directory, batch_size=32):
-    """ Create training and validation data generators. """
     datagen = ImageDataGenerator(
         rescale=1./255,
         rotation_range=10,
@@ -42,7 +40,6 @@ def create_generators(directory, batch_size=32):
     return train_generator, validation_generator
 
 def create_model(input_shape, num_classes):
-    """ Build and compile the CNN model. """
     model = Sequential([
         Conv2D(32, (3, 3), activation='relu', input_shape=input_shape),
         MaxPooling2D(2, 2),

@@ -39,7 +39,7 @@ def main():
 
     # Control TensorFlow verbosity
     if not verbose:
-        os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+        os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
     else:
         os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
     # Importing here to control verbosity
