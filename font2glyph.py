@@ -70,8 +70,12 @@ if __name__ == "__main__":
     # Optional font directory as argument
     if len(sys.argv) > 1:
         font_directory = sys.argv[1]
-    # Otherwise use default
     else:
         font_directory = './fonts'
+
+    # Check if the directory exists
+    if not os.path.exists(font_directory):
+        print(f"Error: The directory '{font_directory}' does not exist.")
+        sys.exit(1)
 
     process_all_fonts(font_directory)
