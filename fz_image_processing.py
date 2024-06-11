@@ -60,7 +60,7 @@ def detect_and_normalize(image_path, export, verbose, export_dir='export', resiz
         char_inverted = cv2.bitwise_not(char_resized)
         char_images.append(char_inverted)
         if export:
-            save_image(char_inverted, export_dir, f'char_{idx}.png')
+            save_image(char_inverted, export_dir, f'char_{idx}.png', verbose)
 
     return char_images
 

@@ -42,16 +42,18 @@ def main():
         os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
     else:
         os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
+    # Importing here to control verbosity
     from fz_predict_font import predict_font, aggregate_predictions
 
-    # Return list of characters from image processing
+    # Get list of characters from image processing
     if verbose:
+        print(f"\nInput image: {image_path}")
         print("Starting text detection and normalization...")
     try:
         char_images = detect_and_normalize(image_path, export, verbose)
         if verbose:
             if char_images:
-                print(f"Detected {len(char_images)} characters.")
+                print(f"\nDetected {len(char_images)} characters.")
             else:
                 print("No characters were detected.")
 
@@ -59,7 +61,7 @@ def main():
         print(f"Error during text detection and normalization: {e}")
         return
 
-#    # Predict on list of characters
+    # Predict on list of characters
     if verbose:
         print("Predicting fonts...")
     try:
@@ -71,9 +73,9 @@ def main():
 
     if num_predictions == 1 and agg_predictions:
         if show_scores:
-            print(f"\nPredicted font: {agg_predictions[0][0]}\nscore: {agg_predictions[0][1]}")
+            print(f"\nFont prediction: {agg_predictions[0][0]}\nscore: {agg_predictions[0][1]}\n")
         else:
-            print(f"\nPredicted font: {agg_predictions[0][0]}")
+            print(agg_predictions[0][0])
 
     elif num_predictions > 1 and agg_predictions:
         print("\nFont predictions:")
@@ -82,10 +84,9 @@ def main():
                 print(f"{font}: {score:.4f}")
             else:
                 print(f"{font}")
+        print()
     else:
-        print("\nNo predictions were made.")
-
-    print()
+        print("\nNo predictions were made.\n")
 
 if __name__ == "__main__":
     main()
