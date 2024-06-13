@@ -4,6 +4,10 @@ from fontTools.ttLib import TTFont
 import re
 import sys
 
+
+# This script recursively goes through a ./fonts/ directory and makes a
+# 200x200 image for every Latin character, for every font
+
 # Get the name of a font from the TTF metadata
 def get_sanitized_font_name(font_path):
     font = TTFont(font_path)

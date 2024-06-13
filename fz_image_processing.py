@@ -3,6 +3,7 @@ import cv2
 import os
 import numpy as np
 
+
 def load_image(image_path):
     if not image_path or not isinstance(image_path, str):
         raise ValueError("The image_path must be a valid string.")

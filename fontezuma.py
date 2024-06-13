@@ -5,7 +5,6 @@ import numpy as np
 from fz_image_processing import detect_and_normalize
 
 
-
 # Allow command line arguments
 def get_args():
     parser = argparse.ArgumentParser(
@@ -71,6 +70,7 @@ def main():
         print(f"Error during font prediction: {e}")
         return
 
+    # Print predictions (differently depending on command line arguments)
     if num_predictions == 1 and agg_predictions:
         if show_scores:
             print(f"\nFont prediction: {agg_predictions[0][0]}\nscore: {agg_predictions[0][1]}\n")

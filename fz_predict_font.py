@@ -14,6 +14,7 @@ with open(indices_path, 'r') as json_file:
     class_indices = json.load(json_file)
 class_labels = {v: k for k, v in class_indices.items()}
 
+# Use the model and indices to make a prediction
 def predict_font(image, model_path="font_recognition_model.keras", indices_path="class_indices.json"):
     if isinstance(image, str):
         image = load_img(image, target_size=(64, 64), color_mode='rgb')
@@ -32,6 +33,7 @@ def predict_font(image, model_path="font_recognition_model.keras", indices_path=
 
     return labeled_predictions
 
+# I have these parallel "file" functions because they worked better when running this file directly
 def predict_font_from_file(image_path, model_path="font_recognition_model.keras", indices_path="class_indices.json"):
     # Load and preprocess the image
     image = load_img(image_path, target_size=(64, 64), color_mode='rgb')
@@ -47,6 +49,7 @@ def predict_font_from_file(image_path, model_path="font_recognition_model.keras"
 
     return labeled_predictions
 
+# Combine the scores of each font
 def aggregate_predictions(predictions):
     font_scores = defaultdict(float)
     for prediction in predictions:
@@ -57,13 +60,13 @@ def aggregate_predictions(predictions):
     sorted_fonts = sorted(font_scores.items(), key=lambda x: x[1], reverse=True)
     return sorted_fonts
 
+# Aggregate scores for this file's main()
 def aggregate_file_predictions(image_paths):
     predictions = []
     for image_path in image_paths:
         result = predict_font_from_file(image_path)
         predictions.extend(result)
 
-    # Aggregate scores
     font_scores = {}
     for font, score in predictions:
         if font in font_scores:
@@ -71,11 +74,12 @@ def aggregate_file_predictions(image_paths):
         else:
             font_scores[font] = score
 
-    # Sort and return the top results
+    # Sort the results
     sorted_fonts = sorted(font_scores.items(), key=lambda x: x[1], reverse=True)
     return sorted_fonts
 
 
+# For testing directly
 def main():
     if len(sys.argv) < 2:
         print("Usage: python fz_predict_font.py <path_to_image1> <path_to_image2> ...")
