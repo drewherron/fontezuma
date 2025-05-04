@@ -1,7 +1,6 @@
 fonts/
 glyphs/
 export/
-test_images/
 *keras
 class_indices.json
 
